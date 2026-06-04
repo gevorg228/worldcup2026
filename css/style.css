@@ -31,6 +31,17 @@ h1 { font-size: 1.4rem; margin: 0 0 12px; }
 h2 { font-size: 1.05rem; margin: 18px 0 10px; color: var(--muted); font-weight: 600; }
 b { color: #fff; }
 
+/* Флаг страны рядом с названием */
+.flag {
+  height: 1em;
+  width: auto;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  vertical-align: -0.12em;
+  margin-right: .5em;
+}
+h1 .flag { height: 1.15em; vertical-align: -0.15em; }
+
 /* --- Полоса прогресса --- */
 .bar {
   height: 8px;

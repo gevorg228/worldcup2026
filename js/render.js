@@ -16,6 +16,12 @@
     return '<div class="bar"><span style="width:' + pctVal + '%"></span></div>';
   }
 
+  function flagImg(set) {
+    return set.flag
+      ? '<img class="flag" src="flags/' + esc(set.flag) + '.svg" alt="" loading="lazy">'
+      : "";
+  }
+
   // Одна карточка-наклейка. sticker: { code, label?, big? }, count: число.
   // Модель: count = всего копий. «Есть» (галочка) = count>=1; «повторки» = count-1.
   // В поле-числе показываем именно повторки (пусто, если их 0).
@@ -53,7 +59,7 @@
     var head =
       '<header class="team-head">' +
       '<a class="back" href="#/">← Все наборы</a>' +
-      "<h1>" + esc(set.name) + "</h1>" +
+      "<h1>" + flagImg(set) + esc(set.name) + "</h1>" +
       teamProgressHTML(set, state) +
       "</header>";
 
@@ -122,7 +128,7 @@
       var done = p.collected === p.total ? " done" : "";
       return (
         '<a class="tile' + done + '" href="#/set/' + esc(set.id) + '">' +
-        '<span class="tile-name">' + esc(set.name) + "</span>" +
+        '<span class="tile-name">' + flagImg(set) + esc(set.name) + "</span>" +
         '<span class="tile-nums">' + p.collected + "/" + p.total + " · " + p.pct + "%</span>" +
         progressBar(p.pct) +
         "</a>"
