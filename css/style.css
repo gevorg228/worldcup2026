@@ -144,12 +144,18 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 /* --- Разворот страны: две «страницы» рядом, как в журнале --- */
 .spread { display: flex; gap: 24px; align-items: flex-start; }
 .page {
+  --pgap: 12px;
   flex: 1 1 0;
   min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pgap);
 }
+/* ряд карточек; неполные ряды прижаты влево */
+.prow { display: flex; gap: var(--pgap); }
+/* карточка — фиксированная ширина «как в сетке из 4 колонок» */
+.page .card { flex: 0 0 calc((100% - 3 * var(--pgap)) / 4); }
+.page .card.wide { flex-basis: 100%; }
 
 .card {
   position: relative;
@@ -178,7 +184,6 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 .card.big { grid-column: span 2; min-height: 150px; }
 /* №13 — горизонтальная: на всю ширину половины, ниже, содержимое в строку */
 .card.wide {
-  grid-column: 1 / -1;
   flex-direction: row;
   gap: 16px;
   min-height: 78px;
@@ -228,7 +233,7 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .spread { flex-direction: column; gap: 12px; }
-  .page { gap: 8px; }
+  .page { --pgap: 8px; }
   .overall-nums .big-pct { font-size: 1.7rem; }
   h1 { font-size: 1.2rem; }
 }
