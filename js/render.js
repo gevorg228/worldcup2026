@@ -22,15 +22,11 @@
   function card(sticker, count) {
     var has = count >= 1;
     var cls = "card" + (has ? " has" : "") + (sticker.big ? " big" : "");
-    var label = sticker.label
-      ? '<span class="card-label">' + esc(sticker.label) + "</span>"
-      : "";
     var dupValue = count >= 2 ? String(count - 1) : "";
     return (
       '<div class="' + cls + '" data-code="' + esc(sticker.code) + '" role="button" tabindex="0"' +
       ' aria-pressed="' + (has ? "true" : "false") + '" aria-label="' + esc(sticker.code) + '">' +
       '<span class="card-code">' + esc(sticker.code) + "</span>" +
-      label +
       '<span class="check" aria-hidden="true">✓</span>' +
       '<span class="dup"><span class="dup-cap">повт.</span>' +
       '<input class="card-count" type="number" inputmode="numeric" min="0" step="1"' +

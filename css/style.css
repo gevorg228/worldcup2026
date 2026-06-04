@@ -156,8 +156,6 @@ b { color: #fff; }
 .card.big { grid-column: span 2; min-height: 120px; }
 
 .card-code { font-weight: 700; font-size: 1rem; }
-.card-label { font-size: .72rem; color: var(--muted); line-height: 1.15; }
-.card.has .card-label { color: #d6f5dd; }
 
 /* Галочка «есть» — видна только на отмеченной карточке */
 .check {
