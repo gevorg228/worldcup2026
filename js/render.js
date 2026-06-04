@@ -61,6 +61,9 @@
       '<a class="back" href="#/">← Все наборы</a>' +
       "<h1>" + flagImg(set) + esc(set.name) + "</h1>" +
       teamProgressHTML(set, state) +
+      '<div class="team-tools">' +
+      '<button type="button" data-action="clear-dupes">Убрать повторки</button>' +
+      "</div>" +
       "</header>";
 
     var body;

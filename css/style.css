@@ -89,7 +89,7 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   gap: 8px;
   margin: 14px 0 6px;
 }
-.toolbar button {
+.toolbar button, .team-tools button {
   font: inherit;
   color: var(--text);
   background: var(--panel-2);
@@ -98,7 +98,8 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   padding: 8px 12px;
   cursor: pointer;
 }
-.toolbar button:hover { border-color: #3a4150; }
+.toolbar button:hover, .team-tools button:hover { border-color: #3a4150; }
+.team-tools { margin-top: 12px; }
 .saved-line { color: var(--muted); font-size: .82rem; }
 
 /* --- Сетка плиток наборов --- */

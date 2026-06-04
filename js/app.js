@@ -93,7 +93,25 @@
     } else if (action === "import") {
       var f = document.getElementById("importFile");
       if (f) f.click();
+    } else if (action === "clear-dupes") {
+      clearDuplicates();
     }
+  }
+
+  // Убирает все повторки в текущем наборе: count>=2 → 1 (отметка «есть» остаётся).
+  function clearDuplicates() {
+    if (!currentSet) return;
+    var dupes = 0;
+    currentSet.stickers.forEach(function (s) {
+      var c = STORE.getCount(state, s.code);
+      if (c >= 2) dupes += c - 1;
+    });
+    if (!dupes) { alert("В этом наборе нет повторок."); return; }
+    if (!confirm("Убрать все повторки в наборе «" + currentSet.name + "»?\nОтметки «есть» останутся. Повторок сейчас: " + dupes + ".")) return;
+    currentSet.stickers.forEach(function (s) {
+      if (STORE.getCount(state, s.code) >= 2) STORE.setCount(state, s.code, 1);
+    });
+    route();
   }
 
   function handleImportFile(input) {
