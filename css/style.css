@@ -8,7 +8,6 @@
   --muted: #9aa3b2;
   --accent: #2ea043;      /* зелёный «есть» */
   --accent-soft: #1c6e2f;
-  --danger: #b3402f;
   --radius: 12px;
 }
 
@@ -88,8 +87,6 @@ b { color: #fff; }
   cursor: pointer;
 }
 .toolbar button:hover { border-color: #3a4150; }
-.toolbar button.danger { color: #ffd7cf; border-color: #5a2b22; }
-.toolbar button.danger:hover { background: #2a1a16; }
 .saved-line { color: var(--muted); font-size: .82rem; }
 
 /* --- Сетка плиток наборов --- */

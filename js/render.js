@@ -109,7 +109,6 @@
       '<div class="toolbar">' +
       '<button type="button" data-action="export">⬇ Экспорт</button>' +
       '<button type="button" data-action="import">⬆ Импорт</button>' +
-      '<button type="button" data-action="reset" class="danger">Сбросить</button>' +
       '<input type="file" id="importFile" accept="application/json,.json" hidden>' +
       "</div>" +
       '<div class="saved-line">' + esc(saved) + "</div>" +

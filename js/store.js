@@ -66,17 +66,6 @@
     return getCount(state, code);
   }
 
-  function resetProgress(state) {
-    state.counts = {};
-    try {
-      localStorage.removeItem(KEY);
-    } catch (e) {
-      console.warn("Не удалось очистить localStorage:", e);
-    }
-    state.updatedAt = null;
-    return state;
-  }
-
   // Экспорт: скачивание JSON-файла бэкапа.
   function exportProgress(state) {
     var payload = {
@@ -147,7 +136,6 @@
     saveProgress: saveProgress,
     getCount: getCount,
     setCount: setCount,
-    resetProgress: resetProgress,
     exportProgress: exportProgress,
     importProgress: importProgress
   };

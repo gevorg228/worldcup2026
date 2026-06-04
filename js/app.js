@@ -93,11 +93,6 @@
     } else if (action === "import") {
       var f = document.getElementById("importFile");
       if (f) f.click();
-    } else if (action === "reset") {
-      if (confirm("Сбросить весь прогресс? Это удалит все отметки в этом браузере.\nСделайте Экспорт заранее, если нужен бэкап.")) {
-        STORE.resetProgress(state);
-        route();
-      }
     }
   }
 
