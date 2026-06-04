@@ -122,10 +122,20 @@ b { color: #fff; }
 
 .fwc-section { margin-bottom: 8px; }
 
-/* --- Сетка карточек --- */
+/* --- Сетка карточек (FWC-разделы) --- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+/* --- Разворот страны: две «страницы» рядом, как в журнале --- */
+.spread { display: flex; gap: 18px; align-items: flex-start; }
+.page {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
@@ -154,6 +164,13 @@ b { color: #fff; }
   border-color: var(--accent);
 }
 .card.big { grid-column: span 2; min-height: 120px; }
+/* №13 — горизонтальная: на всю ширину половины, ниже, содержимое в строку */
+.card.wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: 14px;
+  min-height: 64px;
+}
 
 .card-code { font-weight: 700; font-size: 1rem; }
 
@@ -198,6 +215,8 @@ b { color: #fff; }
 @media (max-width: 560px) {
   .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .spread { flex-direction: column; gap: 12px; }
+  .page { gap: 8px; }
   .overall-nums .big-pct { font-size: 1.7rem; }
   h1 { font-size: 1.2rem; }
 }

@@ -19,9 +19,10 @@
   // Одна карточка-наклейка. sticker: { code, label?, big? }, count: число.
   // Модель: count = всего копий. «Есть» (галочка) = count>=1; «повторки» = count-1.
   // В поле-числе показываем именно повторки (пусто, если их 0).
-  function card(sticker, count) {
+  function card(sticker, count, opts) {
+    opts = opts || {};
     var has = count >= 1;
-    var cls = "card" + (has ? " has" : "") + (sticker.big ? " big" : "");
+    var cls = "card" + (has ? " has" : "") + (sticker.big ? " big" : "") + (opts.wide ? " wide" : "");
     var dupValue = count >= 2 ? String(count - 1) : "";
     return (
       '<div class="' + cls + '" data-code="' + esc(sticker.code) + '" role="button" tabindex="0"' +
@@ -74,10 +75,16 @@
         );
       }).join("");
     } else {
-      var cardsHtml = set.stickers.map(function (s) {
-        return card(s, state.counts[s.code] || 0);
-      }).join("");
-      body = '<div class="grid">' + cardsHtml + "</div>";
+      // Разворот как в журнале: слева наклейки 1–10, справа 11–20. №13 — горизонтальная.
+      var buildPage = function (list, offset) {
+        return list.map(function (s, i) {
+          return card(s, state.counts[s.code] || 0, { wide: (offset + i) === 12 });
+        }).join("");
+      };
+      body = '<div class="spread">' +
+        '<div class="page">' + buildPage(set.stickers.slice(0, 10), 0) + "</div>" +
+        '<div class="page">' + buildPage(set.stickers.slice(10, 20), 10) + "</div>" +
+        "</div>";
     }
 
     return head + '<main class="team-body">' + body + "</main>";
