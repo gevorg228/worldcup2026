@@ -18,17 +18,18 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 18px;
   -webkit-text-size-adjust: 100%;
 }
 
 #view {
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 16px 14px 48px;
+  padding: 24px 22px 64px;
 }
 
-h1 { font-size: 1.4rem; margin: 0 0 12px; }
-h2 { font-size: 1.05rem; margin: 18px 0 10px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 1.7rem; margin: 0 0 14px; }
+h2 { font-size: 1.15rem; margin: 22px 0 12px; color: var(--muted); font-weight: 600; }
 b { color: #fff; }
 
 /* Флаг страны рядом с названием */
@@ -44,11 +45,11 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 
 /* --- Полоса прогресса --- */
 .bar {
-  height: 8px;
+  height: 11px;
   background: var(--panel-2);
   border-radius: 999px;
   overflow: hidden;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .bar > span {
   display: block;
@@ -64,19 +65,19 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 22px;
 }
 .overall-nums {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 18px;
-  font-size: .98rem;
+  gap: 8px 22px;
+  font-size: 1.1rem;
   color: var(--muted);
 }
 .overall-nums .big-pct {
   margin-left: auto;
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 800;
   color: var(--accent);
   line-height: 1;
@@ -103,8 +104,8 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 /* --- Сетка плиток наборов --- */
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: 14px;
 }
 .tile {
   display: block;
@@ -113,12 +114,12 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 16px;
 }
 .tile:hover { border-color: #3a4150; background: var(--panel-2); }
 .tile.done { border-color: var(--accent-soft); }
-.tile-name { display: block; font-weight: 600; }
-.tile-nums { display: block; color: var(--muted); font-size: .82rem; margin-top: 4px; }
+.tile-name { display: block; font-weight: 600; font-size: 1.05rem; }
+.tile-nums { display: block; color: var(--muted); font-size: .9rem; margin-top: 6px; }
 
 /* --- Страница набора --- */
 .team-head { margin-bottom: 16px; }
@@ -136,18 +137,18 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 /* --- Сетка карточек (FWC-разделы) --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
 }
 
 /* --- Разворот страны: две «страницы» рядом, как в журнале --- */
-.spread { display: flex; gap: 18px; align-items: flex-start; }
+.spread { display: flex; gap: 24px; align-items: flex-start; }
 .page {
   flex: 1 1 0;
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .card {
@@ -156,9 +157,9 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 96px;
-  padding: 10px 8px;
+  gap: 8px;
+  min-height: 118px;
+  padding: 14px 10px;
   background: var(--panel);
   border: 2px solid var(--line);
   border-radius: var(--radius);
@@ -174,21 +175,21 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   background: var(--accent-soft);
   border-color: var(--accent);
 }
-.card.big { grid-column: span 2; min-height: 120px; }
+.card.big { grid-column: span 2; min-height: 150px; }
 /* №13 — горизонтальная: на всю ширину половины, ниже, содержимое в строку */
 .card.wide {
   grid-column: 1 / -1;
   flex-direction: row;
-  gap: 14px;
-  min-height: 64px;
+  gap: 16px;
+  min-height: 78px;
 }
 
-.card-code { font-weight: 700; font-size: 1rem; }
+.card-code { font-weight: 700; font-size: 1.1rem; }
 
 /* Галочка «есть» — видна только на отмеченной карточке */
 .check {
   display: none;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 800;
   line-height: 1;
   color: #d6f5dd;
@@ -199,15 +200,15 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 .dup {
   display: none;
   align-items: center;
-  gap: 5px;
-  font-size: .72rem;
+  gap: 6px;
+  font-size: .82rem;
   color: #d6f5dd;
 }
 .card.has .dup { display: inline-flex; }
 .dup-cap { opacity: .85; }
 
 .card-count {
-  width: 44px;
+  width: 54px;
   text-align: center;
   font: inherit;
   font-weight: 700;
@@ -215,7 +216,7 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   background: rgba(0, 0, 0, .25);
   border: 1px solid rgba(255, 255, 255, .25);
   border-radius: 8px;
-  padding: 3px 0;
+  padding: 5px 0;
 }
 /* убираем стрелки у number в WebKit/Firefox для компактности */
 .card-count::-webkit-outer-spin-button,
