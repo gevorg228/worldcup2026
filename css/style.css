@@ -109,7 +109,9 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   gap: 14px;
 }
 .tile {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-height: 132px;
   text-decoration: none;
   color: var(--text);
   background: var(--panel);
@@ -121,6 +123,8 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 .tile.done { border-color: var(--accent-soft); }
 .tile-name { display: block; font-weight: 600; font-size: 1.05rem; }
 .tile-nums { display: block; color: var(--muted); font-size: .9rem; margin-top: 6px; }
+/* полоса всегда внизу плитки и выровнена по ряду */
+.tile .bar { margin-top: auto; }
 
 /* --- Страница набора --- */
 .team-head { margin-bottom: 16px; }
