@@ -83,25 +83,29 @@
     } else {
       // Разворот как в журнале (точно по фото):
       //  левая страница — ряды 2, 4, 4;  правая — 2, одна горизонтальная (№13), 4, 3.
+      // Запись ряда: число — кол-во карточек; "wide" — одна горизонтальная;
+      // объект { n, align } — ряд с выравниванием (например, верхние 2 слева прижаты вправо).
       var rowsHtml = function (stickers, pattern) {
         var html = "", idx = 0;
         pattern.forEach(function (r) {
           if (r === "wide") {
             var w = stickers[idx++];
             html += '<div class="prow">' + card(w, state.counts[w.code] || 0, { wide: true }) + "</div>";
-          } else {
-            var cells = "";
-            for (var k = 0; k < r; k++) {
-              var s = stickers[idx++];
-              cells += card(s, state.counts[s.code] || 0);
-            }
-            html += '<div class="prow">' + cells + "</div>";
+            return;
           }
+          var n = typeof r === "object" ? r.n : r;
+          var align = (typeof r === "object" && r.align) ? " prow-" + r.align : "";
+          var cells = "";
+          for (var k = 0; k < n; k++) {
+            var s = stickers[idx++];
+            cells += card(s, state.counts[s.code] || 0);
+          }
+          html += '<div class="prow' + align + '">' + cells + "</div>";
         });
         return html;
       };
       body = '<div class="spread">' +
-        '<div class="page">' + rowsHtml(set.stickers.slice(0, 10), [2, 4, 4]) + "</div>" +
+        '<div class="page">' + rowsHtml(set.stickers.slice(0, 10), [{ n: 2, align: "right" }, 4, 4]) + "</div>" +
         '<div class="page">' + rowsHtml(set.stickers.slice(10, 20), [2, "wide", 4, 3]) + "</div>" +
         "</div>";
     }

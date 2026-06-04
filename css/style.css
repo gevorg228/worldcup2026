@@ -153,6 +153,7 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 }
 /* ряд карточек; неполные ряды прижаты влево */
 .prow { display: flex; gap: var(--pgap); }
+.prow-right { justify-content: flex-end; }
 /* карточка — фиксированная ширина «как в сетке из 4 колонок» */
 .page .card { flex: 0 0 calc((100% - 3 * var(--pgap)) / 4); }
 .page .card.wide { flex-basis: 100%; }
