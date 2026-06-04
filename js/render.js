@@ -81,32 +81,35 @@
         );
       }).join("");
     } else {
-      // Разворот как в журнале (точно по фото):
-      //  левая страница — ряды 2, 4, 4;  правая — 2, одна горизонтальная (№13), 4, 3.
-      // Запись ряда: число — кол-во карточек; "wide" — одна горизонтальная;
-      // объект { n, align } — ряд с выравниванием (например, верхние 2 слева прижаты вправо).
-      var rowsHtml = function (stickers, pattern) {
+      // Разворот 1:1 по фото. Каждый ряд — { align?, cells: [...] },
+      // где cell "n" — обычная карточка, "w" — горизонтальная (на 2 колонки).
+      //  Левая:  [1,2 справа] / [3,4,5,6] / [7,8,9,10]
+      //  Правая: [11,12, 13-гориз.] / [14,15,16,17] / [18,19,20 справа]
+      var renderRows = function (stickers, rows) {
         var html = "", idx = 0;
-        pattern.forEach(function (r) {
-          if (r === "wide") {
-            var w = stickers[idx++];
-            html += '<div class="prow">' + card(w, state.counts[w.code] || 0, { wide: true }) + "</div>";
-            return;
-          }
-          var n = typeof r === "object" ? r.n : r;
-          var align = (typeof r === "object" && r.align) ? " prow-" + r.align : "";
-          var cells = "";
-          for (var k = 0; k < n; k++) {
+        rows.forEach(function (row) {
+          var cls = "prow" + (row.align ? " prow-" + row.align : "");
+          var cells = row.cells.map(function (t) {
             var s = stickers[idx++];
-            cells += card(s, state.counts[s.code] || 0);
-          }
-          html += '<div class="prow' + align + '">' + cells + "</div>";
+            return card(s, state.counts[s.code] || 0, { wide: t === "w" });
+          }).join("");
+          html += '<div class="' + cls + '">' + cells + "</div>";
         });
         return html;
       };
+      var leftRows = [
+        { align: "right", cells: ["n", "n"] },
+        { cells: ["n", "n", "n", "n"] },
+        { cells: ["n", "n", "n", "n"] }
+      ];
+      var rightRows = [
+        { cells: ["n", "n", "w"] },
+        { cells: ["n", "n", "n", "n"] },
+        { align: "right", cells: ["n", "n", "n"] }
+      ];
       body = '<div class="spread">' +
-        '<div class="page">' + rowsHtml(set.stickers.slice(0, 10), [{ n: 2, align: "right" }, 4, 4]) + "</div>" +
-        '<div class="page">' + rowsHtml(set.stickers.slice(10, 20), [2, "wide", 4, 3]) + "</div>" +
+        '<div class="page">' + renderRows(set.stickers.slice(0, 10), leftRows) + "</div>" +
+        '<div class="page">' + renderRows(set.stickers.slice(10, 20), rightRows) + "</div>" +
         "</div>";
     }
 
