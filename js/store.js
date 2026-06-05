@@ -8,6 +8,7 @@
 
   var KEY = "wc2026-sticker-progress";
   var KEY_GROUPS = "wc2026-group-results";
+  var KEY_PLAYOFF = "wc2026-playoff-results";
   var SCHEMA_VERSION = 1;
 
   function freshState() {
@@ -172,6 +173,46 @@
     saveGroupResults(g);
   }
 
+  // --- Результаты матчей плей-офф (отдельный ключ) -----------------------------
+  // Структура такая же, как у групп: { schemaVersion, results: { matchId: {h,a} } }.
+
+  function loadPlayoffResults() {
+    try {
+      var raw = localStorage.getItem(KEY_PLAYOFF);
+      if (!raw) return { schemaVersion: SCHEMA_VERSION, results: {} };
+      var p = JSON.parse(raw);
+      if (!p || typeof p.results !== "object" || !p.results) {
+        return { schemaVersion: SCHEMA_VERSION, results: {} };
+      }
+      return { schemaVersion: SCHEMA_VERSION, results: p.results };
+    } catch (e) {
+      console.warn("Не удалось прочитать результаты плей-офф:", e);
+      return { schemaVersion: SCHEMA_VERSION, results: {} };
+    }
+  }
+
+  function savePlayoffResults(g) {
+    g.schemaVersion = SCHEMA_VERSION;
+    try {
+      localStorage.setItem(KEY_PLAYOFF, JSON.stringify(g));
+      return true;
+    } catch (e) {
+      console.warn("Не удалось сохранить результаты плей-офф:", e);
+      if (window.WC_onSaveError) window.WC_onSaveError(e);
+      return false;
+    }
+  }
+
+  // Одна половина счёта матча плей-офф (side: "h"|"a"). Пустое/невалидное → null.
+  function setPlayoffSide(g, key, side, value) {
+    var n = parseInt(value, 10);
+    var m = g.results[key] || { h: null, a: null };
+    m[side] = (isNaN(n) || n < 0) ? null : n;
+    if (m.h === null && m.a === null) delete g.results[key];
+    else g.results[key] = m;
+    savePlayoffResults(g);
+  }
+
   window.WC_STORE = {
     loadProgress: loadProgress,
     saveProgress: saveProgress,
@@ -181,6 +222,9 @@
     importProgress: importProgress,
     loadGroupResults: loadGroupResults,
     saveGroupResults: saveGroupResults,
-    setMatchSide: setMatchSide
+    setMatchSide: setMatchSide,
+    loadPlayoffResults: loadPlayoffResults,
+    savePlayoffResults: savePlayoffResults,
+    setPlayoffSide: setPlayoffSide
   };
 })();

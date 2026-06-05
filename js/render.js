@@ -211,7 +211,7 @@
 
   function renderGroup(letter, gstate) {
     var G = window.WC_GROUPS, group = G.byLetter[letter];
-    if (!group) return renderGroupsIndex(gstate);
+    if (!group) return renderGroupsIndex();
 
     var head =
       '<header class="team-head">' +
@@ -249,11 +249,12 @@
     return head + standings + '<div class="matches">' + matches + "</div>";
   }
 
-  function renderGroupsIndex() {
+  function renderGroupsIndex(pstate, gstate) {
     var G = window.WC_GROUPS;
     var head =
       '<header class="overview-head">' +
       '<a class="back" href="#/">← Наборы</a>' +
+      '<div class="topnav"><a href="#/playoff">🏆 Плей-офф (сетка) ↓</a></div>' +
       "<h1>Группы</h1>" +
       "</header>";
     var tiles = G.list.map(function (group) {
@@ -263,7 +264,85 @@
         '<span class="gflags">' + flags + "</span>" +
         "</a>";
     }).join("");
-    return head + '<main class="tiles">' + tiles + "</main>";
+    return head + '<main class="tiles">' + tiles + "</main>" +
+      '<section id="playoffBracket" class="po-section">' + renderPlayoff(pstate, gstate) + "</section>";
+  }
+
+  // --- Плей-офф (сетка) -------------------------------------------------------
+
+  // Одна строка команды в матче: флаг + название (или метка слота) + ячейка счёта.
+  // label — что показать, пока команда не определена (1E, 3ABCDF, A01…).
+  function poTeamRowHTML(mid, side, teamId, label, score, isWin, isLose) {
+    var G = window.WC_GROUPS;
+    var t = teamId ? G.team(teamId) : null;
+    var nm = t ? t.name : (label || "—");
+    var flag = t ? flagImg(t) : "";
+    var cls = "po-team" + (isWin ? " po-win" : "") + (isLose ? " po-lose" : "") + (t ? "" : " po-tbd");
+    var val = (score !== null && score !== undefined && score !== "") ? score : "";
+    return '<div class="' + cls + '">' +
+      '<span class="po-flag">' + flag + "</span>" +
+      '<span class="po-name">' + esc(nm) + "</span>" +
+      '<input class="po-score" type="number" inputmode="numeric" min="0" step="1"' +
+      ' data-pmatch="' + esc(mid) + '" data-side="' + side + '" value="' + esc(val) +
+      '" aria-label="' + esc(nm) + ', счёт"></div>';
+  }
+
+  // Один матч (m — уже резолвленный объект из WC_PLAYOFF).
+  function poMatchHTML(m) {
+    var date = m.date ? '<div class="po-date">' + esc(fmtDate(m.date)) + "</div>" : "";
+    return '<div class="po-match" data-mid="' + esc(m.id) + '">' + date +
+      poTeamRowHTML(m.id, "h", m.a, m.labelA, m.sa, m.winner && m.winner === m.a, m.loser && m.loser === m.a) +
+      poTeamRowHTML(m.id, "a", m.b, m.labelB, m.sb, m.winner && m.winner === m.b, m.loser && m.loser === m.b) +
+      "</div>";
+  }
+
+  // Колонка раунда одной из половин. side: "l" (слева) | "r" (справа).
+  function poColHTML(round, side, matches, resolved) {
+    var inner = matches.map(function (def) {
+      return poMatchHTML(resolved[def.id]);
+    }).join("");
+    return '<div class="po-col po-' + side + '" data-round="' + esc(round.key) + '">' +
+      '<div class="po-round-title">' + esc(round.title) + "</div>" +
+      '<div class="po-round">' + inner + "</div></div>";
+  }
+
+  function renderPlayoff(pstate, gstate) {
+    pstate = pstate || window.WC_STORE.loadPlayoffResults();
+    gstate = gstate || window.WC_STORE.loadGroupResults();
+    var PO = window.WC_PLAYOFF;
+    var resolved = PO.resolveAll(pstate.results, gstate);
+
+    var byKey = {};
+    PO.rounds.forEach(function (r) { byKey[r.key] = r; });
+
+    // Зеркальная сетка: левая половина каждого раунда — слева, правая — справа,
+    // финал — в центре. Колонки справа идут в обратном порядке раундов.
+    var order = ["r32", "r16", "qf", "sf"];
+    var leftCols = order.map(function (k) {
+      var r = byKey[k], half = r.matches.slice(0, r.matches.length / 2);
+      return poColHTML(r, "l", half, resolved);
+    }).join("");
+    var rightCols = order.slice().reverse().map(function (k) {
+      var r = byKey[k], half = r.matches.slice(r.matches.length / 2);
+      return poColHTML(r, "r", half, resolved);
+    }).join("");
+
+    // Центр: финал, а под ним — матч за 3-е место.
+    var finalRound = byKey["final"], thirdRound = byKey["third"];
+    var thirdInline = thirdRound ?
+      '<div class="po-third-inline">' +
+      '<div class="po-third-title">' + esc(thirdRound.title) + "</div>" +
+      poMatchHTML(resolved[thirdRound.matches[0].id]) + "</div>" : "";
+    var centerCol = '<div class="po-col po-center" data-round="final">' +
+      '<div class="po-round-title">' + esc(finalRound.title) + "</div>" +
+      '<div class="po-round">' + poMatchHTML(resolved["final"]) + thirdInline + "</div></div>";
+
+    var bracket = '<div class="po-bracket">' + leftCols + centerCol + rightCols + "</div>";
+
+    return "<h2>Плей-офф</h2>" +
+      '<p class="po-hint">Введите счёт — победитель автоматически проходит дальше, ' +
+      "проигравшие полуфиналов попадают в матч за 3-е место.</p>" +
+      '<div class="po-scroll">' + bracket + "</div>";
   }
 
   window.WC_RENDER = {
@@ -272,6 +351,7 @@
     teamProgressHTML: teamProgressHTML,
     renderGroupsIndex: renderGroupsIndex,
     renderGroup: renderGroup,
-    standingsTableHTML: standingsTableHTML
+    standingsTableHTML: standingsTableHTML,
+    renderPlayoff: renderPlayoff
   };
 })();

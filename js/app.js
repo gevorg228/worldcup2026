@@ -10,6 +10,7 @@
   var view = document.getElementById("view");
   var state = STORE.loadProgress();
   var gstate = STORE.loadGroupResults();
+  var pstate = STORE.loadPlayoffResults();
   var currentSet = null;
   var currentGroup = null;
 
@@ -35,6 +36,8 @@
     var hash = location.hash || "#/";
     currentSet = null;
     currentGroup = null;
+    // Страница групп/плей-офф — во всю ширину экрана (сетка широкая).
+    view.classList.toggle("full", hash === "#/groups" || hash === "#/playoff");
 
     var mSet = hash.match(/^#\/set\/(.+)$/);
     if (mSet) {
@@ -56,8 +59,17 @@
     }
 
     if (hash === "#/groups") {
-      view.innerHTML = RENDER.renderGroupsIndex();
+      view.innerHTML = RENDER.renderGroupsIndex(pstate, gstate);
       window.scrollTo(0, 0);
+      return;
+    }
+
+    // Плей-офф живёт внизу страницы групп — рендерим её и прокручиваем к сетке.
+    if (hash === "#/playoff") {
+      view.innerHTML = RENDER.renderGroupsIndex(pstate, gstate);
+      var pb = document.getElementById("playoffBracket");
+      if (pb) pb.scrollIntoView();
+      else window.scrollTo(0, 0);
       return;
     }
 
@@ -185,6 +197,13 @@
       STORE.setMatchSide(gstate, e.target.getAttribute("data-mkey"), e.target.getAttribute("data-side"), e.target.value);
       var box = document.getElementById("groupStandings");
       if (box && currentGroup) box.innerHTML = RENDER.standingsTableHTML(currentGroup, gstate);
+      return;
+    }
+    if (e.target.classList && e.target.classList.contains("po-score")) {
+      STORE.setPlayoffSide(pstate, e.target.getAttribute("data-pmatch"), e.target.getAttribute("data-side"), e.target.value);
+      // Перерисовываем всю сетку: победитель мог сдвинуться дальше по раундам.
+      var pbox = document.getElementById("playoffBracket");
+      if (pbox) pbox.innerHTML = RENDER.renderPlayoff(pstate, gstate);
       return;
     }
     if (e.target.id === "importFile") {
