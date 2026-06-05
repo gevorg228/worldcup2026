@@ -7,6 +7,7 @@
   "use strict";
 
   var KEY = "wc2026-sticker-progress";
+  var KEY_GROUPS = "wc2026-group-results";
   var SCHEMA_VERSION = 1;
 
   function freshState() {
@@ -131,12 +132,55 @@
     reader.readAsText(file);
   }
 
+  // --- Результаты матчей в группах (отдельный ключ) ----------------------------
+
+  function loadGroupResults() {
+    try {
+      var raw = localStorage.getItem(KEY_GROUPS);
+      if (!raw) return { schemaVersion: SCHEMA_VERSION, results: {} };
+      var p = JSON.parse(raw);
+      if (!p || typeof p.results !== "object" || !p.results) {
+        return { schemaVersion: SCHEMA_VERSION, results: {} };
+      }
+      return { schemaVersion: SCHEMA_VERSION, results: p.results };
+    } catch (e) {
+      console.warn("Не удалось прочитать результаты групп:", e);
+      return { schemaVersion: SCHEMA_VERSION, results: {} };
+    }
+  }
+
+  function saveGroupResults(g) {
+    g.schemaVersion = SCHEMA_VERSION;
+    try {
+      localStorage.setItem(KEY_GROUPS, JSON.stringify(g));
+      return true;
+    } catch (e) {
+      console.warn("Не удалось сохранить результаты групп:", e);
+      if (window.WC_onSaveError) window.WC_onSaveError(e);
+      return false;
+    }
+  }
+
+  // Устанавливает одну половину счёта матча (side: "h"|"a"). Пустое/невалидное → null.
+  // Если обе половины пусты — удаляем матч (держим карту разрежённой).
+  function setMatchSide(g, key, side, value) {
+    var n = parseInt(value, 10);
+    var m = g.results[key] || { h: null, a: null };
+    m[side] = (isNaN(n) || n < 0) ? null : n;
+    if (m.h === null && m.a === null) delete g.results[key];
+    else g.results[key] = m;
+    saveGroupResults(g);
+  }
+
   window.WC_STORE = {
     loadProgress: loadProgress,
     saveProgress: saveProgress,
     getCount: getCount,
     setCount: setCount,
     exportProgress: exportProgress,
-    importProgress: importProgress
+    importProgress: importProgress,
+    loadGroupResults: loadGroupResults,
+    saveGroupResults: saveGroupResults,
+    setMatchSide: setMatchSide
   };
 })();

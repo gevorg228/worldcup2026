@@ -232,8 +232,50 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 }
 /* убираем стрелки у number в WebKit/Firefox для компактности */
 .card-count::-webkit-outer-spin-button,
-.card-count::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.card-count { -moz-appearance: textfield; appearance: textfield; }
+.card-count::-webkit-inner-spin-button,
+.ms::-webkit-outer-spin-button,
+.ms::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.card-count, .ms { -moz-appearance: textfield; appearance: textfield; }
+
+/* --- Группы и турнирная таблица --- */
+.topnav { margin-bottom: 10px; }
+.topnav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.topnav a:hover { text-decoration: underline; }
+
+.gtile .gflags { display: flex; gap: 6px; margin-top: auto; padding-top: 10px; }
+.gtile .gflags .flag { height: 1.3em; margin: 0; }
+
+.table-wrap { overflow-x: auto; }
+.standings { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.standings th {
+  color: var(--muted); font-weight: 600; font-size: .8rem;
+  text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.standings th:nth-child(2) { text-align: left; }
+.standings td { padding: 11px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.standings td.c { text-align: center; }
+.standings td.team span { vertical-align: middle; }
+.standings td.pts { font-weight: 800; color: #fff; }
+.standings .next .flag { margin: 0; }
+
+.dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin: 0 2px; vertical-align: middle; }
+.dot-w { background: var(--accent); }
+.dot-d { background: #8a93a3; }
+.dot-l { background: #b3402f; }
+.dot-e { border: 1px solid var(--line); }
+
+.matches { margin-top: 24px; }
+.matchday { margin-bottom: 14px; }
+.match { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 0; }
+.match .mt { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.match .mt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match .mt-h { justify-content: flex-end; text-align: right; }
+.match .mt-a { justify-content: flex-start; }
+.match .ms {
+  width: 48px; text-align: center; font: inherit; font-weight: 700; color: var(--text);
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 0;
+}
+.match .msep { color: var(--muted); }
 
 /* --- Адаптив --- */
 @media (max-width: 560px) {

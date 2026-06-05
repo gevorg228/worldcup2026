@@ -9,7 +9,9 @@
 
   var view = document.getElementById("view");
   var state = STORE.loadProgress();
+  var gstate = STORE.loadGroupResults();
   var currentSet = null;
+  var currentGroup = null;
 
   // Индексы: набор по id и множество всех известных кодов (для валидации импорта).
   var SET_BY_ID = {};
@@ -31,10 +33,12 @@
 
   function route() {
     var hash = location.hash || "#/";
-    var m = hash.match(/^#\/set\/(.+)$/);
-    if (m) {
-      var id = decodeURIComponent(m[1]);
-      var set = SET_BY_ID[id];
+    currentSet = null;
+    currentGroup = null;
+
+    var mSet = hash.match(/^#\/set\/(.+)$/);
+    if (mSet) {
+      var set = SET_BY_ID[decodeURIComponent(mSet[1])];
       if (set) {
         currentSet = set;
         view.innerHTML = RENDER.renderTeam(set, state);
@@ -42,7 +46,21 @@
         return;
       }
     }
-    currentSet = null;
+
+    var mGroup = hash.match(/^#\/group\/([A-L])$/);
+    if (mGroup) {
+      currentGroup = mGroup[1];
+      view.innerHTML = RENDER.renderGroup(currentGroup, gstate);
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (hash === "#/groups") {
+      view.innerHTML = RENDER.renderGroupsIndex();
+      window.scrollTo(0, 0);
+      return;
+    }
+
     view.innerHTML = RENDER.renderOverview(DATA, state);
     window.scrollTo(0, 0);
   }
@@ -161,6 +179,12 @@
     if (e.target.classList && e.target.classList.contains("card-count")) {
       var cardEl = e.target.closest(".card");
       if (cardEl) setCardDuplicates(cardEl, e.target.value);
+      return;
+    }
+    if (e.target.classList && e.target.classList.contains("ms")) {
+      STORE.setMatchSide(gstate, e.target.getAttribute("data-mkey"), e.target.getAttribute("data-side"), e.target.value);
+      var box = document.getElementById("groupStandings");
+      if (box && currentGroup) box.innerHTML = RENDER.standingsTableHTML(currentGroup, gstate);
       return;
     }
     if (e.target.id === "importFile") {
