@@ -5,19 +5,20 @@
   "use strict";
 
   // Состав групп (порядок — как в альбоме; при равенстве очков служит тай-брейком).
+  // dates — даты 6 матчей в порядке PAIRS (см. ниже): t0-t1, t2-t3, t0-t2, t3-t1, t0-t3, t1-t2.
   var GROUPS = [
-    { letter: "A", teams: ["MEX", "RSA", "KOR", "CZE"] },
-    { letter: "B", teams: ["CAN", "BIH", "QAT", "SUI"] },
-    { letter: "C", teams: ["BRA", "MAR", "HAI", "SCO"] },
-    { letter: "D", teams: ["USA", "PAR", "AUS", "TUR"] },
-    { letter: "E", teams: ["GER", "CUW", "CIV", "ECU"] },
-    { letter: "F", teams: ["NED", "JPN", "SWE", "TUN"] },
-    { letter: "G", teams: ["BEL", "EGY", "IRN", "NZL"] },
-    { letter: "H", teams: ["ESP", "CPV", "KSA", "URU"] },
-    { letter: "I", teams: ["FRA", "SEN", "IRQ", "NOR"] },
-    { letter: "J", teams: ["ARG", "ALG", "AUT", "JOR"] },
-    { letter: "K", teams: ["POR", "COD", "UZB", "COL"] },
-    { letter: "L", teams: ["ENG", "CRO", "GHA", "PAN"] }
+    { letter: "A", teams: ["MEX", "RSA", "KOR", "CZE"], dates: ["11.06", "12.06", "19.06", "18.06", "25.06", "25.06"] },
+    { letter: "B", teams: ["CAN", "BIH", "QAT", "SUI"], dates: ["12.06", "13.06", "19.06", "18.06", "24.06", "24.06"] },
+    { letter: "C", teams: ["BRA", "MAR", "HAI", "SCO"], dates: ["14.06", "14.06", "20.06", "20.06", "25.06", "25.06"] },
+    { letter: "D", teams: ["USA", "PAR", "AUS", "TUR"], dates: ["13.06", "14.06", "19.06", "20.06", "26.06", "26.06"] },
+    { letter: "E", teams: ["GER", "CUW", "CIV", "ECU"], dates: ["14.06", "15.06", "20.06", "21.06", "25.06", "25.06"] },
+    { letter: "F", teams: ["NED", "JPN", "SWE", "TUN"], dates: ["14.06", "15.06", "20.06", "21.06", "26.06", "26.06"] },
+    { letter: "G", teams: ["BEL", "EGY", "IRN", "NZL"], dates: ["15.06", "16.06", "21.06", "22.06", "27.06", "27.06"] },
+    { letter: "H", teams: ["ESP", "CPV", "KSA", "URU"], dates: ["15.06", "16.06", "21.06", "22.06", "27.06", "27.06"] },
+    { letter: "I", teams: ["FRA", "SEN", "IRQ", "NOR"], dates: ["16.06", "17.06", "23.06", "23.06", "26.06", "26.06"] },
+    { letter: "J", teams: ["ARG", "ALG", "AUT", "JOR"], dates: ["17.06", "17.06", "22.06", "23.06", "28.06", "28.06"] },
+    { letter: "K", teams: ["POR", "COD", "UZB", "COL"], dates: ["17.06", "18.06", "23.06", "24.06", "28.06", "28.06"] },
+    { letter: "L", teams: ["ENG", "CRO", "GHA", "PAN"], dates: ["17.06", "18.06", "23.06", "24.06", "28.06", "28.06"] }
   ];
 
   var byLetter = {};
@@ -31,17 +32,21 @@
 
   function matchKey(letter, home, away) { return letter + ":" + home + "-" + away; }
 
-  // 6 матчей (круговой метод на 4 командах), в порядке туров.
+  // 6 матчей (круговой метод на 4 командах). Дата берётся из group.dates по индексу.
   var PAIRS = [[0, 1], [2, 3], [0, 2], [3, 1], [0, 3], [1, 2]];
   function allMatches(group) {
-    return PAIRS.map(function (p) {
+    return PAIRS.map(function (p, i) {
       var home = group.teams[p[0]], away = group.teams[p[1]];
-      return { home: home, away: away, key: matchKey(group.letter, home, away) };
+      return { home: home, away: away, key: matchKey(group.letter, home, away), date: group.dates[i] };
     });
   }
-  function matchdays(group) {
-    var m = allMatches(group);
-    return [[m[0], m[1]], [m[2], m[3]], [m[4], m[5]]];
+  // "ДД.ММ" → число для сортировки по дате
+  function dateKey(d) {
+    var p = String(d).split(".");
+    return (+p[1]) * 100 + (+p[0]);
+  }
+  function matchesByDate(group) {
+    return allMatches(group).slice().sort(function (a, b) { return dateKey(a.date) - dateKey(b.date); });
   }
 
   function played(r) {
@@ -58,7 +63,8 @@
     });
     var anyPlayed = false;
 
-    allMatches(group).forEach(function (m) {
+    // по датам — чтобы «форма» и «след. соперник» шли в хронологическом порядке
+    matchesByDate(group).forEach(function (m) {
       var r = results[m.key];
       if (played(r)) {
         anyPlayed = true;
@@ -89,7 +95,8 @@
     team: team,
     matchKey: matchKey,
     allMatches: allMatches,
-    matchdays: matchdays,
+    matchesByDate: matchesByDate,
+    dateKey: dateKey,
     compute: compute
   };
 })();

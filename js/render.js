@@ -173,6 +173,11 @@
     for (var i = 0; i < 3; i++) html += dot(form[i] || null);
     return html;
   }
+  function fmtDate(d) {
+    var p = String(d).split(".");
+    var mm = { "06": "июня", "07": "июля" }[p[1]] || ("." + p[1]);
+    return (+p[0]) + " " + mm;
+  }
 
   // Таблица группы (используется и для точечного обновления после ввода счёта).
   function standingsTableHTML(letter, gstate) {
@@ -216,21 +221,29 @@
 
     var standings = '<div id="groupStandings">' + standingsTableHTML(letter, gstate) + "</div>";
 
-    var matches = G.matchdays(group).map(function (md, i) {
-      var rows = md.map(function (m) {
-        var r = gstate.results[m.key] || {};
-        var hv = (r.h !== null && r.h !== undefined) ? r.h : "";
-        var av = (r.a !== null && r.a !== undefined) ? r.a : "";
-        var H = G.team(m.home), A = G.team(m.away);
-        return '<div class="match">' +
-          '<span class="mt mt-h"><span>' + esc(H.name) + "</span>" + flagImg(H) + "</span>" +
-          '<input class="ms" type="number" inputmode="numeric" min="0" data-mkey="' + esc(m.key) + '" data-side="h" value="' + hv + '" aria-label="' + esc(H.name) + '">' +
-          '<span class="msep">:</span>' +
-          '<input class="ms" type="number" inputmode="numeric" min="0" data-mkey="' + esc(m.key) + '" data-side="a" value="' + av + '" aria-label="' + esc(A.name) + '">' +
-          '<span class="mt mt-a">' + flagImg(A) + "<span>" + esc(A.name) + "</span></span>" +
-          "</div>";
-      }).join("");
-      return '<section class="matchday"><h2>Тур ' + (i + 1) + "</h2>" + rows + "</section>";
+    var matchRow = function (m) {
+      var r = gstate.results[m.key] || {};
+      var hv = (r.h !== null && r.h !== undefined) ? r.h : "";
+      var av = (r.a !== null && r.a !== undefined) ? r.a : "";
+      var H = G.team(m.home), A = G.team(m.away);
+      return '<div class="match">' +
+        '<span class="mt mt-h"><span>' + esc(H.name) + "</span>" + flagImg(H) + "</span>" +
+        '<input class="ms" type="number" inputmode="numeric" min="0" data-mkey="' + esc(m.key) + '" data-side="h" value="' + hv + '" aria-label="' + esc(H.name) + '">' +
+        '<span class="msep">:</span>' +
+        '<input class="ms" type="number" inputmode="numeric" min="0" data-mkey="' + esc(m.key) + '" data-side="a" value="' + av + '" aria-label="' + esc(A.name) + '">' +
+        '<span class="mt mt-a">' + flagImg(A) + "<span>" + esc(A.name) + "</span></span>" +
+        "</div>";
+    };
+    // группируем матчи по дате (в хронологическом порядке)
+    var byDate = [];
+    G.matchesByDate(group).forEach(function (m) {
+      var last = byDate[byDate.length - 1];
+      if (last && last.date === m.date) last.items.push(m);
+      else byDate.push({ date: m.date, items: [m] });
+    });
+    var matches = byDate.map(function (d) {
+      return '<section class="matchday"><h2>' + esc(fmtDate(d.date)) + "</h2>" +
+        d.items.map(matchRow).join("") + "</section>";
     }).join("");
 
     return head + standings + '<div class="matches">' + matches + "</div>";
