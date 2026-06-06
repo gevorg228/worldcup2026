@@ -137,6 +137,29 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   margin-bottom: 8px;
 }
 .back:hover { color: var(--text); }
+
+/* Навигация между наборами: ‹ название › */
+.team-nav { display: flex; align-items: center; gap: 12px; }
+.team-nav h1 { margin: 0; flex: 0 1 auto; }
+.team-nav-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 1.8rem;
+  line-height: 1;
+  text-decoration: none;
+  user-select: none;
+}
+.team-nav-btn:hover { border-color: #3a4150; color: var(--text); background: var(--panel-2); }
+.team-nav-btn.next { margin-left: auto; }
+
 .progress-line .nums { color: var(--muted); font-size: .95rem; }
 
 .fwc-section { margin-bottom: 8px; }

@@ -55,11 +55,36 @@
     );
   }
 
+  // Ссылка-стрелка на соседний набор (предыдущий/следующий), с зацикливанием.
+  function teamNavBtn(set, dir) {
+    if (!set) return "";
+    var arrow = dir < 0 ? "‹" : "›";
+    var cls = "team-nav-btn " + (dir < 0 ? "prev" : "next");
+    var title = (dir < 0 ? "Предыдущий: " : "Следующий: ") + set.name;
+    return '<a class="' + cls + '" href="#/set/' + esc(set.id) + '"' +
+      ' title="' + esc(title) + '" aria-label="' + esc(title) + '">' + arrow + "</a>";
+  }
+
+  // Сосед по списку наборов со сдвигом dir (−1 / +1), по кругу.
+  function neighborSet(set, dir) {
+    var sets = (window.WC_DATA && window.WC_DATA.sets) || [];
+    var i = -1;
+    for (var k = 0; k < sets.length; k++) { if (sets[k].id === set.id) { i = k; break; } }
+    if (i < 0 || sets.length < 2) return null;
+    return sets[(i + dir + sets.length) % sets.length];
+  }
+
   function renderTeam(set, state) {
+    var prev = neighborSet(set, -1);
+    var next = neighborSet(set, 1);
     var head =
       '<header class="team-head">' +
       '<a class="back" href="#/">← Все наборы</a>' +
+      '<div class="team-nav">' +
+      teamNavBtn(prev, -1) +
       "<h1>" + flagImg(set) + esc(set.name) + "</h1>" +
+      teamNavBtn(next, 1) +
+      "</div>" +
       teamProgressHTML(set, state) +
       '<div class="team-tools">' +
       '<button type="button" data-action="clear-dupes">Убрать повторки</button>' +

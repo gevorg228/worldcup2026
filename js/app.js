@@ -211,6 +211,23 @@
     }
   });
 
+  // Навигация между наборами стрелками клавиатуры (←/→) на странице набора.
+  // Не перехватываем, если фокус в поле ввода или зажат модификатор.
+  document.addEventListener("keydown", function (e) {
+    if (!currentSet) return;
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+    var sets = DATA.sets;
+    var i = sets.indexOf(currentSet);
+    if (i < 0 || sets.length < 2) return;
+    var dir = e.key === "ArrowLeft" ? -1 : 1;
+    var nb = sets[(i + dir + sets.length) % sets.length];
+    e.preventDefault();
+    location.hash = "#/set/" + encodeURIComponent(nb.id);
+  });
+
   window.addEventListener("hashchange", route);
 
   // --- Старт -----------------------------------------------------------------
