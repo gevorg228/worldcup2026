@@ -9,10 +9,7 @@
 
   var view = document.getElementById("view");
   var state = STORE.loadProgress();
-  var gstate = STORE.loadGroupResults();
-  var pstate = STORE.loadPlayoffResults();
   var currentSet = null;
-  var currentGroup = null;
 
   // Индексы: набор по id и множество всех известных кодов (для валидации импорта).
   var SET_BY_ID = {};
@@ -35,9 +32,6 @@
   function route() {
     var hash = location.hash || "#/";
     currentSet = null;
-    currentGroup = null;
-    // Страница групп/плей-офф — во всю ширину экрана (сетка широкая).
-    view.classList.toggle("full", hash === "#/groups" || hash === "#/playoff");
 
     var mSet = hash.match(/^#\/set\/(.+)$/);
     if (mSet) {
@@ -50,26 +44,9 @@
       }
     }
 
-    var mGroup = hash.match(/^#\/group\/([A-L])$/);
-    if (mGroup) {
-      currentGroup = mGroup[1];
-      view.innerHTML = RENDER.renderGroup(currentGroup, gstate);
+    if (hash === "#/report") {
+      view.innerHTML = RENDER.renderReport(DATA, state);
       window.scrollTo(0, 0);
-      return;
-    }
-
-    if (hash === "#/groups") {
-      view.innerHTML = RENDER.renderGroupsIndex(pstate, gstate);
-      window.scrollTo(0, 0);
-      return;
-    }
-
-    // Плей-офф живёт внизу страницы групп — рендерим её и прокручиваем к сетке.
-    if (hash === "#/playoff") {
-      view.innerHTML = RENDER.renderGroupsIndex(pstate, gstate);
-      var pb = document.getElementById("playoffBracket");
-      if (pb) pb.scrollIntoView();
-      else window.scrollTo(0, 0);
       return;
     }
 
@@ -125,6 +102,12 @@
       if (f) f.click();
     } else if (action === "clear-dupes") {
       clearDuplicates();
+    } else if (action === "report") {
+      location.hash = "#/report";
+    } else if (action === "report-txt") {
+      window.WC_REPORT.downloadText(window.WC_REPORT.build(DATA, state));
+    } else if (action === "report-csv") {
+      window.WC_REPORT.downloadCSV(window.WC_REPORT.build(DATA, state));
     }
   }
 
@@ -193,22 +176,30 @@
       if (cardEl) setCardDuplicates(cardEl, e.target.value);
       return;
     }
-    if (e.target.classList && e.target.classList.contains("ms")) {
-      STORE.setMatchSide(gstate, e.target.getAttribute("data-mkey"), e.target.getAttribute("data-side"), e.target.value);
-      var box = document.getElementById("groupStandings");
-      if (box && currentGroup) box.innerHTML = RENDER.standingsTableHTML(currentGroup, gstate);
-      return;
-    }
-    if (e.target.classList && e.target.classList.contains("po-score")) {
-      STORE.setPlayoffSide(pstate, e.target.getAttribute("data-pmatch"), e.target.getAttribute("data-side"), e.target.value);
-      // Перерисовываем всю сетку: победитель мог сдвинуться дальше по раундам.
-      var pbox = document.getElementById("playoffBracket");
-      if (pbox) pbox.innerHTML = RENDER.renderPlayoff(pstate, gstate);
-      return;
-    }
     if (e.target.id === "importFile") {
       handleImportFile(e.target);
     }
+  });
+
+  // --- Поиск наборов на главной ----------------------------------------------
+  // Фильтрует плитки по data-search (имя + id + коды наклеек) без перерендера.
+  function filterTiles(query) {
+    var tiles = document.getElementById("setTiles");
+    if (!tiles) return;
+    var q = query.trim().toLowerCase();
+    var shown = 0;
+    var cards = tiles.querySelectorAll(".tile");
+    for (var i = 0; i < cards.length; i++) {
+      var match = !q || (cards[i].getAttribute("data-search") || "").indexOf(q) !== -1;
+      cards[i].hidden = !match;
+      if (match) shown++;
+    }
+    var empty = document.getElementById("searchEmpty");
+    if (empty) empty.hidden = shown !== 0;
+  }
+
+  view.addEventListener("input", function (e) {
+    if (e.target.id === "setSearch") filterTiles(e.target.value);
   });
 
   // Навигация между наборами стрелками клавиатуры (←/→) на странице набора.

@@ -104,6 +104,24 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 .team-tools { margin-top: 12px; }
 .saved-line { color: var(--muted); font-size: .82rem; }
 
+/* --- Поиск наборов --- */
+.search-box { margin: 14px 0 18px; }
+.search-input {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-empty { display: block; color: var(--muted); margin-top: 12px; }
+
 /* --- Сетка плиток наборов --- */
 .tiles {
   display: grid;
@@ -223,25 +241,27 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 
 .card-code { font-weight: 700; font-size: 1.1rem; }
 
-/* Галочка «есть» — видна только на отмеченной карточке */
+/* Галочка «есть» — место под неё зарезервировано всегда (visibility, а не display),
+   чтобы размер карточки не менялся при отметке и ряд не «скакал». */
 .check {
-  display: none;
+  visibility: hidden;
   font-size: 1.5rem;
   font-weight: 800;
   line-height: 1;
   color: #d6f5dd;
 }
-.card.has .check { display: block; }
+.card.has .check { visibility: visible; }
 
-/* Блок повторок — виден только когда «есть» */
+/* Блок повторок — тоже всегда занимает место, виден только когда «есть» */
 .dup {
-  display: none;
+  display: inline-flex;
+  visibility: hidden;
   align-items: center;
   gap: 6px;
   font-size: .82rem;
   color: #d6f5dd;
 }
-.card.has .dup { display: inline-flex; }
+.card.has .dup { visibility: visible; }
 .dup-cap { opacity: .85; }
 
 .card-count {
@@ -261,6 +281,94 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
 .ms::-webkit-outer-spin-button,
 .ms::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .card-count, .ms { -moz-appearance: textfield; appearance: textfield; }
+
+/* --- Отчёт по коллекции (есть / нужно / повторки) --- */
+.report { margin-top: 8px; }
+.rep-section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.rep-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  user-select: none;
+  list-style: none;
+}
+.rep-section > summary::-webkit-details-marker { display: none; }
+.rep-section > summary::before {
+  content: "▸";
+  color: var(--muted);
+  margin-right: 4px;
+  transition: transform .15s ease;
+}
+.rep-section[open] > summary::before { transform: rotate(90deg); }
+.rep-section > summary > span:first-of-type { flex: 1; }
+.rep-count {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: .9rem;
+  color: var(--muted);
+}
+.rep-body { padding: 4px 18px 18px; }
+
+.rep-set { margin: 14px 0; }
+.rep-set:first-child { margin-top: 4px; }
+.rep-set h3 {
+  font-size: .98rem;
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--text);
+}
+.rep-set h3 .cnt { color: var(--muted); font-weight: 400; font-size: .85rem; margin-left: 4px; }
+.rep-set h3 .flag { height: 1em; }
+.rep-empty { color: var(--muted); margin: 10px 0; }
+
+.rep-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .9rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+}
+.chip-missing { color: #f3c0b6; border-color: #5a3128; background: #2a1a16; }
+.chip-have { color: #c8f0d2; border-color: var(--accent-soft); background: #16291b; }
+.chip-dup { color: #ffe3a3; border-color: #5a4a1f; background: #2a2412; }
+.chip-x {
+  font-size: .78rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, .14);
+  border-radius: 5px;
+  padding: 0 5px;
+}
+
+/* сводная таблица по наборам */
+.rep-summary { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.rep-summary th {
+  color: var(--muted); font-weight: 600; font-size: .8rem;
+  text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.rep-summary th:first-child { text-align: left; }
+.rep-summary td { padding: 9px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rep-summary td.c { text-align: center; }
+.rep-summary .rep-name .flag { height: 1em; }
+.rep-summary tr.rep-done td { color: #c8f0d2; }
+.rep-summary tr.rep-done .rep-name { font-weight: 600; }
 
 /* --- Группы и турнирная таблица --- */
 .topnav { margin-bottom: 10px; }
