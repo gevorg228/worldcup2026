@@ -220,12 +220,21 @@
       '<div class="rep-chips">' + chips + "</div></div>";
   }
 
+  // Кнопка «скачать этот блок» (.txt). dlKind — ключ секции в WC_REPORT.
+  function sectionDlBtn(dlKind) {
+    return '<button type="button" class="rep-dl" data-action="dl-' + dlKind + '"' +
+      ' title="Скачать этот блок (.txt)">⬇ .txt</button>';
+  }
+
   // Секция отчёта внутри <details> (длинные списки можно свернуть).
   function reportSection(title, count, openByDefault, sets, pick, kind, emptyMsg) {
     var blocks = sets.map(function (s) { return reportSetBlock(s, pick(s), kind); }).join("");
     if (!blocks) blocks = '<p class="rep-empty">' + esc(emptyMsg) + "</p>";
     return '<details class="rep-section"' + (openByDefault ? " open" : "") + ">" +
-      "<summary><span>" + esc(title) + '</span><span class="rep-count">' + count + "</span></summary>" +
+      "<summary><span>" + esc(title) + "</span>" +
+      '<span class="rep-count">' + count + "</span>" +
+      sectionDlBtn(kind) +
+      "</summary>" +
       '<div class="rep-body">' + blocks + "</div></details>";
   }
 
@@ -268,7 +277,7 @@
     }).join("");
     var summary =
       '<details class="rep-section" open>' +
-      "<summary><span>Сводка по наборам</span></summary>" +
+      "<summary><span>Сводка по наборам</span>" + sectionDlBtn("summary") + "</summary>" +
       '<div class="rep-body"><div class="table-wrap"><table class="rep-summary">' +
       "<thead><tr><th>Набор</th><th class=\"c\">Есть</th><th class=\"c\">%</th>" +
       '<th class="c">Нужно</th><th class="c">Повт.</th></tr></thead>' +

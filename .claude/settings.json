@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check report.js)",
+      "Bash(node --check render.js)",
+      "Bash(node --check app.js)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

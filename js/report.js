@@ -49,68 +49,85 @@
   }
   function setPct(s) { return s.total ? Math.round(s.have / s.total * 100) : 0; }
 
-  function toText(rep) {
-    var t = rep.totals, L = [];
-    L.push("Альбом ЧМ-2026 — отчёт по наклейкам");
-    L.push("Сформировано: " + rep.generatedAt.toLocaleString("ru-RU"));
-    L.push("");
-    L.push("ИТОГО: " + t.total + " наклеек");
-    L.push("  ✓ Есть:    " + padEnd(t.have, 4) + " (" + t.pct + "%)");
-    L.push("  ✗ Нужно:   " + t.missing);
-    L.push("  ⇄ На обмен (повторки): " + t.dupes);
-    L.push("");
-
-    L.push(RULE);
-    L.push("СВОДКА ПО НАБОРАМ");
-    L.push(RULE);
+  // Каждая секция — отдельная функция (возвращает массив строк),
+  // чтобы её можно было выгрузить и целиком, и по отдельности.
+  function headerLines(rep) {
+    var t = rep.totals;
+    return [
+      "Альбом ЧМ-2026 — отчёт по наклейкам",
+      "Сформировано: " + rep.generatedAt.toLocaleString("ru-RU"),
+      "",
+      "ИТОГО: " + t.total + " наклеек",
+      "  ✓ Есть:    " + padEnd(t.have, 4) + " (" + t.pct + "%)",
+      "  ✗ Нужно:   " + t.missing,
+      "  ⇄ На обмен (повторки): " + t.dupes
+    ];
+  }
+  function summaryLines(rep) {
+    var L = [RULE, "СВОДКА ПО НАБОРАМ", RULE];
     rep.sets.forEach(function (s) {
       L.push(padEnd(s.name, 24) + padEnd(s.have + "/" + s.total, 8) +
         padEnd("(" + setPct(s) + "%)", 7) + "повт. " + s.dupes);
     });
-    L.push("");
-
-    L.push(RULE);
-    L.push("НУЖНЫЕ — нет в наличии (" + t.missing + ")");
-    L.push(RULE);
-    if (!t.missing) {
-      L.push("— всё собрано! 🎉");
-    } else {
-      rep.sets.forEach(function (s) {
-        if (s.missingItems.length) {
-          L.push(s.name + " (" + s.missingItems.length + "): " + codeList(s.missingItems));
-        }
-      });
-    }
-    L.push("");
-
-    L.push(RULE);
-    L.push("НА ОБМЕН — повторки (× = сколько лишних копий) — всего " + t.dupes);
-    L.push(RULE);
-    var anyDup = false;
+    return L;
+  }
+  function missingLines(rep) {
+    var t = rep.totals, L = [RULE, "НУЖНЫЕ — нет в наличии (" + t.missing + ")", RULE];
+    if (!t.missing) { L.push("— всё собрано! 🎉"); return L; }
+    rep.sets.forEach(function (s) {
+      if (s.missingItems.length) {
+        L.push(s.name + " (" + s.missingItems.length + "): " + codeList(s.missingItems));
+      }
+    });
+    return L;
+  }
+  function dupLines(rep) {
+    var t = rep.totals, L = [RULE, "НА ОБМЕН — повторки (× = сколько лишних копий) — всего " + t.dupes, RULE];
+    var any = false;
     rep.sets.forEach(function (s) {
       if (!s.dupeItems.length) return;
-      anyDup = true;
+      any = true;
       L.push(s.name + ": " + s.dupeItems.map(function (i) {
         return i.code + "×" + i.spare;
       }).join(", "));
     });
-    if (!anyDup) L.push("— повторок нет.");
-    L.push("");
+    if (!any) L.push("— повторок нет.");
+    return L;
+  }
+  function haveLines(rep) {
+    var t = rep.totals, L = [RULE, "ЕСТЬ В НАЛИЧИИ (" + t.have + ")", RULE];
+    if (!t.have) { L.push("— пока ничего не отмечено."); return L; }
+    rep.sets.forEach(function (s) {
+      if (s.haveItems.length) {
+        L.push(s.name + " (" + s.haveItems.length + "): " + codeList(s.haveItems));
+      }
+    });
+    return L;
+  }
 
-    L.push(RULE);
-    L.push("ЕСТЬ В НАЛИЧИИ (" + t.have + ")");
-    L.push(RULE);
-    if (!t.have) {
-      L.push("— пока ничего не отмечено.");
-    } else {
-      rep.sets.forEach(function (s) {
-        if (s.haveItems.length) {
-          L.push(s.name + " (" + s.haveItems.length + "): " + codeList(s.haveItems));
-        }
-      });
-    }
+  function toText(rep) {
+    return headerLines(rep).concat(
+      [""], summaryLines(rep),
+      [""], missingLines(rep),
+      [""], dupLines(rep),
+      [""], haveLines(rep)
+    ).join("\r\n");
+  }
 
-    return L.join("\r\n");
+  // Описание секций для выгрузки по отдельности.
+  var SECTIONS = {
+    summary: { lines: summaryLines, file: "сводка" },
+    missing: { lines: missingLines, file: "нужные" },
+    dup: { lines: dupLines, file: "на-обмен" },
+    have: { lines: haveLines, file: "есть" }
+  };
+
+  // Текст одной секции — с короткой шапкой (дата), чтобы файл был самодостаточным.
+  function sectionText(rep, kind) {
+    var s = SECTIONS[kind];
+    if (!s) return "";
+    return ["Альбом ЧМ-2026 — " + rep.generatedAt.toLocaleString("ru-RU"), ""]
+      .concat(s.lines(rep)).join("\r\n");
   }
 
   // --- Таблица CSV (.csv) — строка = страна, 20 клеток (наклейки 1..20) -------
@@ -158,13 +175,20 @@
   function downloadCSV(rep) {
     download("wc2026-наклейки-" + stamp() + ".csv", toCSV(rep), "text/csv");
   }
+  function downloadSection(rep, kind) {
+    var s = SECTIONS[kind];
+    if (!s) return;
+    download("wc2026-" + s.file + "-" + stamp() + ".txt", sectionText(rep, kind), "text/plain");
+  }
 
   window.WC_REPORT = {
     build: build,
     toText: toText,
     toCSV: toCSV,
+    sectionText: sectionText,
     download: download,
     downloadText: downloadText,
-    downloadCSV: downloadCSV
+    downloadCSV: downloadCSV,
+    downloadSection: downloadSection
   };
 })();

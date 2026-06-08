@@ -320,6 +320,19 @@ h1 .flag { height: 1.15em; vertical-align: -0.15em; }
   font-size: .9rem;
   color: var(--muted);
 }
+/* кнопка «скачать этот блок» в шапке секции */
+.rep-dl {
+  font: inherit;
+  font-size: .85rem;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rep-dl:hover { border-color: #3a4150; background: var(--panel); }
 .rep-body { padding: 4px 18px 18px; }
 
 .rep-set { margin: 14px 0; }

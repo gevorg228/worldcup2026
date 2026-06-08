@@ -108,6 +108,9 @@
       window.WC_REPORT.downloadText(window.WC_REPORT.build(DATA, state));
     } else if (action === "report-csv") {
       window.WC_REPORT.downloadCSV(window.WC_REPORT.build(DATA, state));
+    } else if (action.indexOf("dl-") === 0) {
+      // выгрузка одного блока отчёта (dl-summary / dl-missing / dl-dup / dl-have)
+      window.WC_REPORT.downloadSection(window.WC_REPORT.build(DATA, state), action.slice(3));
     }
   }
 
@@ -155,7 +158,8 @@
 
   view.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-action]");
-    if (btn) { handleAction(btn.getAttribute("data-action")); return; }
+    // preventDefault — чтобы кнопка внутри <summary> не сворачивала блок отчёта.
+    if (btn) { e.preventDefault(); handleAction(btn.getAttribute("data-action")); return; }
 
     if (e.target.closest(".dup")) return; // клик по блоку повторок не переключает «есть»
     var cardEl = e.target.closest(".card");
