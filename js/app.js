@@ -104,8 +104,6 @@
       clearDuplicates();
     } else if (action === "report") {
       location.hash = "#/report";
-    } else if (action === "report-txt") {
-      window.WC_REPORT.downloadText(window.WC_REPORT.build(DATA, state));
     } else if (action === "report-csv") {
       window.WC_REPORT.downloadCSV(window.WC_REPORT.build(DATA, state));
     } else if (action.indexOf("dl-") === 0) {

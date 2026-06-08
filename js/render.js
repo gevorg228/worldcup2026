@@ -220,10 +220,10 @@
       '<div class="rep-chips">' + chips + "</div></div>";
   }
 
-  // Кнопка «скачать этот блок» (.txt). dlKind — ключ секции в WC_REPORT.
+  // Кнопка «скачать этот блок» (таблица .csv). dlKind — ключ секции в WC_REPORT.
   function sectionDlBtn(dlKind) {
     return '<button type="button" class="rep-dl" data-action="dl-' + dlKind + '"' +
-      ' title="Скачать этот блок (.txt)">⬇ .txt</button>';
+      ' title="Скачать этот блок таблицей (.csv)">⬇ .csv</button>';
   }
 
   // Секция отчёта внутри <details> (длинные списки можно свернуть).
@@ -257,8 +257,7 @@
       progressBar(t.pct) +
       "</div>" +
       '<div class="toolbar">' +
-      '<button type="button" data-action="report-txt">⬇ Скачать .txt</button>' +
-      '<button type="button" data-action="report-csv">⬇ Скачать .csv (таблица)</button>' +
+      '<button type="button" data-action="report-csv">⬇ Скачать всё (таблица .csv)</button>' +
       "</div>" +
       '<div class="saved-line">Сформировано: ' + esc(rep.generatedAt.toLocaleString("ru-RU")) + "</div>" +
       "</header>";

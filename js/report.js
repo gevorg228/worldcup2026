@@ -1,6 +1,6 @@
 /* Отчёт по коллекции: что ЕСТЬ, чего НЕТ, какие ПОВТОРКИ (на обмен).
    Чистый модуль: строит структуру из каталога (WC_DATA) и состояния (store.js),
-   затем сериализует её в человекочитаемый .txt и в .csv (для таблиц/Excel).
+   затем сериализует её в табличный .csv (для Excel). Все выгрузки — таблицы.
    Модель счётчиков та же, что в progress.js:
      count>=1 — «есть»; повторки (на обмен) = count-1 при count>=2. */
 (function () {
@@ -35,128 +35,76 @@
     return { generatedAt: new Date(), totals: totals, sets: sets };
   }
 
-  // --- Текстовый отчёт (.txt) -------------------------------------------------
-
-  var RULE = "────────────────────────────────────────────────";
-
-  function codeList(items) {
-    return items.map(function (i) { return i.code; }).join(", ");
-  }
-  function padEnd(str, len) {
-    str = String(str);
-    while (str.length < len) str += " ";
-    return str;
-  }
-  function setPct(s) { return s.total ? Math.round(s.have / s.total * 100) : 0; }
-
-  // Каждая секция — отдельная функция (возвращает массив строк),
-  // чтобы её можно было выгрузить и целиком, и по отдельности.
-  function headerLines(rep) {
-    var t = rep.totals;
-    return [
-      "Альбом ЧМ-2026 — отчёт по наклейкам",
-      "Сформировано: " + rep.generatedAt.toLocaleString("ru-RU"),
-      "",
-      "ИТОГО: " + t.total + " наклеек",
-      "  ✓ Есть:    " + padEnd(t.have, 4) + " (" + t.pct + "%)",
-      "  ✗ Нужно:   " + t.missing,
-      "  ⇄ На обмен (повторки): " + t.dupes
-    ];
-  }
-  function summaryLines(rep) {
-    var L = [RULE, "СВОДКА ПО НАБОРАМ", RULE];
-    rep.sets.forEach(function (s) {
-      L.push(padEnd(s.name, 24) + padEnd(s.have + "/" + s.total, 8) +
-        padEnd("(" + setPct(s) + "%)", 7) + "повт. " + s.dupes);
-    });
-    return L;
-  }
-  function missingLines(rep) {
-    var t = rep.totals, L = [RULE, "НУЖНЫЕ — нет в наличии (" + t.missing + ")", RULE];
-    if (!t.missing) { L.push("— всё собрано! 🎉"); return L; }
-    rep.sets.forEach(function (s) {
-      if (s.missingItems.length) {
-        L.push(s.name + " (" + s.missingItems.length + "): " + codeList(s.missingItems));
-      }
-    });
-    return L;
-  }
-  function dupLines(rep) {
-    var t = rep.totals, L = [RULE, "НА ОБМЕН — повторки (× = сколько лишних копий) — всего " + t.dupes, RULE];
-    var any = false;
-    rep.sets.forEach(function (s) {
-      if (!s.dupeItems.length) return;
-      any = true;
-      L.push(s.name + ": " + s.dupeItems.map(function (i) {
-        return i.code + "×" + i.spare;
-      }).join(", "));
-    });
-    if (!any) L.push("— повторок нет.");
-    return L;
-  }
-  function haveLines(rep) {
-    var t = rep.totals, L = [RULE, "ЕСТЬ В НАЛИЧИИ (" + t.have + ")", RULE];
-    if (!t.have) { L.push("— пока ничего не отмечено."); return L; }
-    rep.sets.forEach(function (s) {
-      if (s.haveItems.length) {
-        L.push(s.name + " (" + s.haveItems.length + "): " + codeList(s.haveItems));
-      }
-    });
-    return L;
-  }
-
-  function toText(rep) {
-    return headerLines(rep).concat(
-      [""], summaryLines(rep),
-      [""], missingLines(rep),
-      [""], dupLines(rep),
-      [""], haveLines(rep)
-    ).join("\r\n");
-  }
-
-  // Описание секций для выгрузки по отдельности.
-  var SECTIONS = {
-    summary: { lines: summaryLines, file: "сводка" },
-    missing: { lines: missingLines, file: "нужные" },
-    dup: { lines: dupLines, file: "на-обмен" },
-    have: { lines: haveLines, file: "есть" }
-  };
-
-  // Текст одной секции — с короткой шапкой (дата), чтобы файл был самодостаточным.
-  function sectionText(rep, kind) {
-    var s = SECTIONS[kind];
-    if (!s) return "";
-    return ["Альбом ЧМ-2026 — " + rep.generatedAt.toLocaleString("ru-RU"), ""]
-      .concat(s.lines(rep)).join("\r\n");
-  }
-
-  // --- Таблица CSV (.csv) — строка = страна, 20 клеток (наклейки 1..20) -------
-  // В клетке: «есть» (1 шт.), «повтор» (есть + лишние), пусто (нет).
+  // --- Табличный CSV (.csv) ---------------------------------------------------
+  // Все выгрузки — таблицы. Сетка: строка = страна, колонки 1..20 (наклейки).
   // Разделитель «;» и BOM — чтобы Excel с русской локалью открыл корректно.
+
+  var BOM = "﻿";
 
   function csvCell(v) {
     v = String(v == null ? "" : v);
     if (/[";\n\r]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
     return v;
   }
-  function toCSV(rep) {
+
+  // Сетка «страна × 20 клеток»; cellFn(item) задаёт содержимое клетки.
+  function gridCSV(rep, cellFn) {
     var header = ["Страна"];
     for (var n = 1; n <= 20; n++) header.push(n);
     var rows = [header.join(";")];
     rep.sets.forEach(function (s) {
       var row = [csvCell(s.name)];
-      s.items.forEach(function (i) {
-        row.push(i.count >= 2 ? "повтор" : (i.count >= 1 ? "есть" : ""));
-      });
+      s.items.forEach(function (i) { row.push(csvCell(cellFn(i))); });
       rows.push(row.join(";"));
     });
-    return "﻿" + rows.join("\r\n");
+    return BOM + rows.join("\r\n");
+  }
+
+  // Полная таблица: «есть» / «повтор» / пусто.
+  function toCSV(rep) {
+    return gridCSV(rep, function (i) {
+      return i.count >= 2 ? "повтор" : (i.count >= 1 ? "есть" : "");
+    });
+  }
+
+  // Секции — тоже таблицы. Сводка — статистика по наборам;
+  // остальные — та же сетка 20 клеток, но только со своими отметками.
+  var SECTIONS = {
+    summary: {
+      file: "сводка",
+      csv: function (rep) {
+        var rows = ["Страна;Есть;Всего;%;Повторки"];
+        rep.sets.forEach(function (s) {
+          var pc = s.total ? Math.round(s.have / s.total * 100) : 0;
+          rows.push([csvCell(s.name), s.have, s.total, pc, s.dupes].join(";"));
+        });
+        return BOM + rows.join("\r\n");
+      }
+    },
+    missing: {
+      file: "нужные",
+      csv: function (rep) { return gridCSV(rep, function (i) { return i.has ? "" : "нужно"; }); }
+    },
+    dup: {
+      file: "на-обмен",
+      // в клетке — сколько лишних копий (на обмен)
+      csv: function (rep) { return gridCSV(rep, function (i) { return i.spare > 0 ? i.spare : ""; }); }
+    },
+    have: {
+      file: "есть",
+      csv: function (rep) { return gridCSV(rep, function (i) { return i.has ? "есть" : ""; }); }
+    }
+  };
+
+  function sectionCSV(rep, kind) {
+    var s = SECTIONS[kind];
+    return s ? s.csv(rep) : "";
   }
 
   // --- Скачивание файла -------------------------------------------------------
 
   function download(filename, content, mime) {
-    var blob = new Blob([content], { type: (mime || "text/plain") + ";charset=utf-8" });
+    var blob = new Blob([content], { type: (mime || "text/csv") + ";charset=utf-8" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
@@ -169,25 +117,20 @@
 
   function stamp() { return new Date().toISOString().slice(0, 10); } // YYYY-MM-DD
 
-  function downloadText(rep) {
-    download("wc2026-наклейки-" + stamp() + ".txt", toText(rep), "text/plain");
-  }
   function downloadCSV(rep) {
     download("wc2026-наклейки-" + stamp() + ".csv", toCSV(rep), "text/csv");
   }
   function downloadSection(rep, kind) {
     var s = SECTIONS[kind];
     if (!s) return;
-    download("wc2026-" + s.file + "-" + stamp() + ".txt", sectionText(rep, kind), "text/plain");
+    download("wc2026-" + s.file + "-" + stamp() + ".csv", s.csv(rep), "text/csv");
   }
 
   window.WC_REPORT = {
     build: build,
-    toText: toText,
     toCSV: toCSV,
-    sectionText: sectionText,
+    sectionCSV: sectionCSV,
     download: download,
-    downloadText: downloadText,
     downloadCSV: downloadCSV,
     downloadSection: downloadSection
   };
