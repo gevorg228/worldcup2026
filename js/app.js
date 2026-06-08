@@ -187,6 +187,8 @@
 
   // --- Поиск наборов на главной ----------------------------------------------
   // Фильтрует плитки по data-search (имя + id + коды наклеек) без перерендера.
+  // Прячем через style.display (а не .hidden): у .tile задан display:flex,
+  // который перебивает браузерное [hidden]{display:none}, поэтому .hidden не сработает.
   function filterTiles(query) {
     var tiles = document.getElementById("setTiles");
     if (!tiles) return;
@@ -195,11 +197,11 @@
     var cards = tiles.querySelectorAll(".tile");
     for (var i = 0; i < cards.length; i++) {
       var match = !q || (cards[i].getAttribute("data-search") || "").indexOf(q) !== -1;
-      cards[i].hidden = !match;
+      cards[i].style.display = match ? "" : "none";
       if (match) shown++;
     }
     var empty = document.getElementById("searchEmpty");
-    if (empty) empty.hidden = shown !== 0;
+    if (empty) empty.style.display = (q && shown === 0) ? "block" : "none";
   }
 
   view.addEventListener("input", function (e) {

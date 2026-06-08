@@ -179,7 +179,7 @@
       '<input type="search" id="setSearch" class="search-input" autocomplete="off"' +
       ' placeholder="Поиск: страна или код наклейки (напр. qat)"' +
       ' aria-label="Поиск набора">' +
-      '<span class="search-empty" id="searchEmpty" hidden>Ничего не найдено</span>' +
+      '<span class="search-empty" id="searchEmpty" style="display:none">Ничего не найдено</span>' +
       "</div>";
 
     var tiles = data.sets.map(function (set) {
