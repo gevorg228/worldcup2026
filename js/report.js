@@ -113,7 +113,8 @@
     return L.join("\r\n");
   }
 
-  // --- Таблица CSV (.csv) — по одной строке на наклейку ----------------------
+  // --- Таблица CSV (.csv) — строка = страна, 20 клеток (наклейки 1..20) -------
+  // В клетке: «есть» (1 шт.), «повтор» (есть + лишние), пусто (нет).
   // Разделитель «;» и BOM — чтобы Excel с русской локалью открыл корректно.
 
   function csvCell(v) {
@@ -122,14 +123,15 @@
     return v;
   }
   function toCSV(rep) {
-    var rows = ["Набор;Код;Подпись;Статус;Всего копий;Повторки"];
+    var header = ["Страна"];
+    for (var n = 1; n <= 20; n++) header.push(n);
+    var rows = [header.join(";")];
     rep.sets.forEach(function (s) {
+      var row = [csvCell(s.name)];
       s.items.forEach(function (i) {
-        rows.push([
-          csvCell(s.name), csvCell(i.code), csvCell(i.label),
-          i.has ? "есть" : "нет", i.count, i.spare
-        ].join(";"));
+        row.push(i.count >= 2 ? "повтор" : (i.count >= 1 ? "есть" : ""));
       });
+      rows.push(row.join(";"));
     });
     return "﻿" + rows.join("\r\n");
   }
