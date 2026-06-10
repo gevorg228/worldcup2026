@@ -48,11 +48,19 @@
   }
 
   // Сетка «страна × 20 клеток»; cellFn(item) задаёт содержимое клетки.
+  // Для обычных стран номер колонки = номер наклейки. У спец-набора FWC первая
+  // клетка — «00», поэтому коды сдвинуты относительно номера колонки; чтобы строку
+  // не читали как ерунду, над ней печатаем её собственную шапку кодов.
   function gridCSV(rep, cellFn) {
     var header = ["Страна"];
     for (var n = 1; n <= 20; n++) header.push(n);
     var rows = [header.join(";")];
     rep.sets.forEach(function (s) {
+      if (s.kind === "special") {
+        var codeRow = ["коды"];
+        s.items.forEach(function (i) { codeRow.push(csvCell(i.code)); });
+        rows.push(codeRow.join(";"));
+      }
       var row = [csvCell(s.name)];
       s.items.forEach(function (i) { row.push(csvCell(cellFn(i))); });
       rows.push(row.join(";"));
